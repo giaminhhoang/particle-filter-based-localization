@@ -27,7 +27,7 @@ param.resol = 25;
 % 3. Indicate where you will put the origin in pixels
 param.origin = [685,572]';
 
-param.init_pose = -init_pose;
+param.init_pose = init_pose;
 
 %% Plot LIDAR data
 lidar_local = [ranges(:,1).*cos(scanAngles) -ranges(:,1).*sin(scanAngles)];
@@ -35,7 +35,8 @@ lidar_local = [ranges(:,1).*cos(scanAngles) -ranges(:,1).*sin(scanAngles)];
 
 figure,
 plot(0,0,'rs'); hold on;
-plot(lidar_local(:,1),lidar_local(:,2),'.-'); 
+plot(lidar_local(:,1),lidar_local(:,2),'.-');
+plot(lidar_local(1,1),lidar_local(1,2),'bo');
 axis equal;
 set(gca,'YDir','reverse');
 xlabel('x');
@@ -48,7 +49,7 @@ title('Lidar measurement in the body frame');
 % Running time could take long depending on the efficiency of your code.
 % For a quicker test, you may take some hundreds frames as input arguments as
 % shown.
-%pose = particleLocalization(ranges(:,1:1000), scanAngles, M, param);
+poseEst = particleLocalization(ranges(:,1:3701), scanAngles, M, param);
 load practice-answer.mat;
 
 %% Plot final solution
@@ -57,8 +58,9 @@ figure;
 imagesc(M); hold on;
 
 %% Plot LIDAR data
-lidar_global(:,1) =  (ranges(:,1).*cos(scanAngles + pose(3,1)) + pose(1,1))*param.resol + param.origin(1);
-lidar_global(:,2) = (-ranges(:,1).*sin(scanAngles + pose(3,1)) + pose(2,1))*param.resol + param.origin(2);
+sample = 1;
+lidar_global(:,1) =  (ranges(:,sample).*cos(scanAngles + pose(3,sample)) + pose(1,sample))*param.resol + param.origin(1);
+lidar_global(:,2) = (-ranges(:,sample).*sin(scanAngles + pose(3,sample)) + pose(2,sample))*param.resol + param.origin(2);
 
 plot(lidar_global(:,1), lidar_global(:,2), 'g.'); 
 
@@ -68,3 +70,8 @@ axis equal;
 hold on;
 plot(pose(1,:)*param.resol+param.origin(1), ...
     pose(2,:)*param.resol+param.origin(2), 'r.-');
+% plot estimated trajectory
+if exist('poseEst', 'var')
+    plot(poseEst(1,:)*param.resol+param.origin(1), ...
+        poseEst(2,:)*param.resol+param.origin(2), 'c.-');
+end
