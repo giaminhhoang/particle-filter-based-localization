@@ -38,8 +38,8 @@ nMeas = length(scanAngles);
 % particle fileter parameters
 % coarse prediction
 sigYawRate = 3 * pi/180;     % 3 deg
-sigX = .05;                   % 0.2 m
-sigY = .05;                   % 0.2 m
+sigX = .2;                   % 0.2 m
+sigY = .2;                   % 0.2 m
 
 % Kalman filter to estimate velocity
 % vInit = [0; 0];
@@ -76,7 +76,7 @@ for j = 2:N % You will start estimating myPose from j=2 using ranges(:,2).
 %         lidar_global(:,1) =  ceil(ranges(:,j).*cos(-scanAngles + particle(3)) + particle(1))*param.resol + param.origin(1);
 %         lidar_global(:,2) =  ceil(ranges(:,j).*sin(-scanAngles + particle(3)) + particle(2))*param.resol + param.origin(2);
 %         gridOcc = lidar_global';
-        posOcc = repmat(particle(1:2), 1, nMeas) + repmat(ranges(:,j), 1, 2)' .* [cos(-scanAngles' + particle(3)); sin(-scanAngles' + particle(3))];
+        posOcc = repmat(particle(1:2), 1, nMeas) + repmat(ranges(:,j), 1, 2)' .* [cos(scanAngles' + particle(3)); -sin(scanAngles' + particle(3))];
         gridOcc = repmat(myOrigin, 1, nMeas) + ceil(myResolution * posOcc); % replace myOrigin
 
     %   2-2) For each particle, calculate the correlation scores of the particles
@@ -84,9 +84,9 @@ for j = 2:N % You will start estimating myPose from j=2 using ranges(:,2).
         for o = 1:size(gridOcc, 2)
             if gridOcc(2,o) > size(map, 1) || gridOcc(2,o) < 1 || gridOcc(1,o) > size(map, 2) || gridOcc(1,o) < 1
                continue
-            elseif map(gridOcc(2,o), gridOcc(1,o)) > 1.0 % plot histogram of map
+            elseif map(gridOcc(2,o), gridOcc(1,o)) > 0.7 % plot histogram of map
                 score = score + 10;
-            elseif map(gridOcc(2,o), gridOcc(1,o)) < 0.0 % plot histogram of map
+            elseif map(gridOcc(2,o), gridOcc(1,o)) <= 0.5 % plot histogram of map
                 score = score - 5;
             end
         end
@@ -126,7 +126,7 @@ for j = 2:N % You will start estimating myPose from j=2 using ranges(:,2).
 %     end
 
 end
-
+% save('test_dump.mat', 'param', 'ranges', 'scanAngles', 'map');
 end
 
 

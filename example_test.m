@@ -7,6 +7,11 @@
 clear all;
 close all;
 
+test = 1;
+if test
+load test_dump.mat
+M = map;
+else
 load practice.mat
 % This will load four variables: ranges, scanAngles, t, pose
 % [1] t is K-by-1 array containing time in second. (K=3701)
@@ -28,29 +33,32 @@ param.resol = 25;
 param.origin = [685,572]';
 
 param.init_pose = init_pose;
+end
 
 %% Plot LIDAR data
 lidar_local = [ranges(:,1).*cos(scanAngles) -ranges(:,1).*sin(scanAngles)];
 
 
-figure,
-plot(0,0,'rs'); hold on;
-plot(lidar_local(:,1),lidar_local(:,2),'.-');
-plot(lidar_local(1,1),lidar_local(1,2),'bo');
-axis equal;
-set(gca,'YDir','reverse');
-xlabel('x');
-ylabel('y');
-grid on;
-title('Lidar measurement in the body frame');
+% figure,
+% plot(0,0,'rs'); hold on;
+% plot(lidar_local(:,1),lidar_local(:,2),'.-');
+% plot(lidar_local(1,1),lidar_local(1,2),'bo');
+% axis equal;
+% set(gca,'YDir','reverse');
+% xlabel('x');
+% ylabel('y');
+% grid on;
+% title('Lidar measurement in the body frame');
 
 %% Run algorithm
 % Call your mapping function here.
 % Running time could take long depending on the efficiency of your code.
 % For a quicker test, you may take some hundreds frames as input arguments as
 % shown.
-poseEst = particleLocalization(ranges(:,1:3701), scanAngles, M, param);
+poseEst = particleLocalization(ranges(:,1:1489), scanAngles, M, param);
+if ~test
 load practice-answer.mat;
+end
 
 %% Plot final solution
 % The final grid map:
@@ -59,6 +67,9 @@ imagesc(M); hold on;
 
 %% Plot LIDAR data
 sample = 1;
+if ~exist('pose', 'var')
+    pose = param.init_pose;
+end
 lidar_global(:,1) =  (ranges(:,sample).*cos(scanAngles + pose(3,sample)) + pose(1,sample))*param.resol + param.origin(1);
 lidar_global(:,2) = (-ranges(:,sample).*sin(scanAngles + pose(3,sample)) + pose(2,sample))*param.resol + param.origin(2);
 
